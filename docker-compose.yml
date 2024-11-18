@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  neo4j:
+    image: ${NEO4J_IMAGE}
+    volumes:
+      - /$HOME/servers/neo4j/logs:/logs
+      - /$HOME/servers/neo4j/config:/config
+      - /$HOME/servers/neo4j/data:/data
+      - /$HOME/servers/neo4j/plugins:/plugins
+    environment:
+      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
+    ports:
+      - "${NEO4J_PORT}:7474"
+      - "7687:7687"
+    restart: always
