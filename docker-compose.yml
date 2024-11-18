@@ -1,16 +1,42 @@
-version: "3"
-
 services:
   neo4j:
-    image: ${NEO4J_IMAGE}
+    image: ${NEO4J_IMAGE:-docker.io/neo4j:5.25-community}
     volumes:
-      - /$HOME/servers/neo4j/logs:/logs
-      - /$HOME/servers/neo4j/config:/config
-      - /$HOME/servers/neo4j/data:/data
-      - /$HOME/servers/neo4j/plugins:/plugins
+      - /$HOME/servers/tmp/neo4j/logs:/logs
+      - /$HOME/servers/tmp/neo4j/config:/config
+      - /$HOME/servers/tmp/neo4j/data:/data
+      - /$HOME/servers/tmp/neo4j/plugins:/plugins
     environment:
-      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
+      - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-SuperSecurePassw0rd}
     ports:
-      - "${NEO4J_PORT}:7474"
+      - "${NEO4J_PORT:-7474}:7474"
       - "7687:7687"
+    restart: always
+
+  postgres:
+    image: ${POSTGRES_IMAGE:-docker.io/postgres:17-bullseye}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-SuperSecurePassw0rd}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - /$HOME/servers/tmp/postgres/data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: ${REDIS_IMAGE:-docker.io/redis:7.4-alpine}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - /$HOME/servers/tmp/redis/data:/data
+    restart: always
+
+  rabbitmq:
+    image: ${RABBITMQ_IMAGE:-docker.io/rabbitmq:4-alpine}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "15672:15672"
+    volumes:
+      - /$HOME/servers/tmp/rabbitmq/data:/var/lib/rabbitmq
     restart: always
