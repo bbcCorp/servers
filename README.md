@@ -2,9 +2,7 @@
 Running servers locally using Docker containers
 
 ## Prerequisites
-
-1. Setup the `SERVER_HOME` variable to the path of the `server` project
-2. Have Docker installed.
+- `Docker` or `Podman` along with `docker compose` command
 
 
 ## Running local servers using Docker

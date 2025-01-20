@@ -10,4 +10,6 @@ docker pull docker.io/rabbitmq:4-alpine
 # Pull app layer images
 docker pull docker.io/python:3.13-bullseye
 docker pull mcr.microsoft.com/dotnet/sdk:8.0
+docker pull mcr.microsoft.com/dotnet/sdk:9.0
 docker pull mcr.microsoft.com/dotnet/aspnet:8.0
+docker pull mcr.microsoft.com/dotnet/aspnet:9.0

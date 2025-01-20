@@ -2,10 +2,10 @@ services:
   neo4j:
     image: ${NEO4J_IMAGE:-docker.io/neo4j:5.25-community}
     volumes:
-      - /$SERVER_HOME/tmp/neo4j/logs:/logs
-      - /$SERVER_HOME/tmp/neo4j/config:/config
-      - /$SERVER_HOME/tmp/neo4j/data:/data
-      - /$SERVER_HOME/tmp/neo4j/plugins:/plugins
+      - ./dev-servers/neo4j/logs:/logs
+      - ./dev-servers/neo4j/config:/config
+      - ./dev-servers/neo4j/data:/data
+      - ./dev-servers/neo4j/plugins:/plugins  
     environment:
       - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-SuperSecurePassw0rd}
     ports:
@@ -21,7 +21,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - /$SERVER_HOME/tmp/postgres/data:/var/lib/postgresql/data
+      - ./dev-servers/postgres/data:/var/lib/postgresql/data
     restart: always
 
   redis:
@@ -29,7 +29,7 @@ services:
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
-      - /$SERVER_HOME/tmp/redis/data:/data
+      - ./dev-servers/redis/data:/data
     restart: always
 
   rabbitmq:
@@ -38,6 +38,5 @@ services:
       - "${RABBITMQ_PORT:-5672}:5672"
       - "15672:15672"
     volumes:
-      - /$SERVER_HOME/tmp/rabbitmq/data:/var/lib/rabbitmq
+      - ./dev-servers/rabbitmq/data:/var/lib/rabbitmq
     restart: always
-
