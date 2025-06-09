@@ -13,3 +13,9 @@ $ sh fetch_images.sh
 # Bring up the servers
 $ docker-compose -f ./docker-compose.yml up 
 ```
+
+## Server urls
+
+| Server | Endpoint |
+| --- | --- |
+| N8N | http://localhost:5678 | 
