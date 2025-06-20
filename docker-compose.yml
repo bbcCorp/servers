@@ -1,4 +1,6 @@
 services:
+  
+
   neo4j:
     image: ${NEO4J_IMAGE:-docker.io/neo4j:5.25-community}
     container_name: neo4j
@@ -13,6 +15,7 @@ services:
       - "${NEO4J_PORT:-7474}:7474"
       - "7687:7687"
     restart: always
+
 
   postgres:
     image: ${POSTGRES_IMAGE:-docker.io/postgres:17-bullseye}
@@ -41,6 +44,7 @@ services:
       - ./dev-servers/pgvector/data:/var/lib/postgresql/data
     restart: always
 
+
   redis:
     image: ${REDIS_IMAGE:-docker.io/redis:7.4-alpine}
     container_name: redis
@@ -49,6 +53,7 @@ services:
     volumes:
       - ./dev-servers/redis/data:/data
     restart: always
+
 
   rabbitmq:
     image: ${RABBITMQ_IMAGE:-docker.io/rabbitmq:4-management-alpine}
@@ -63,6 +68,7 @@ services:
       - ./dev-servers/rabbitmq/data:/var/lib/rabbitmq
     restart: always
 
+
   mongo:
     image: ${MONGO_IMAGE:-percona/percona-server-mongodb:latest}
     container_name: mongo
@@ -75,6 +81,7 @@ services:
       - ./dev-servers/mongo/data:/data/db
     restart: always
 
+
   n8n:
     image: ${N8N_IMAGE:-n8nio/n8n:latest}
     container_name: n8n
@@ -85,6 +92,7 @@ services:
       - ./dev-servers/n8n/data:/home/node/.n8n
     depends_on:
       - rabbitmq
+
 
   minio:
     image: ${MINIO_IMAGE:-minio/minio:latest}
@@ -101,3 +109,16 @@ services:
       - MINIO_DEFAULT_BUCKET=${MINIO_BUCKET_NAME:-mys3bucket}
     command: server /data --console-address ":9001"
     restart: always
+
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports: ["11435:11434"] # change the host port 11435
+    volumes:
+      - ./dev-servers/ollama:/root/.ollama
+    pull_policy: always
+    tty: true
+    restart: unless-stopped
+
+  

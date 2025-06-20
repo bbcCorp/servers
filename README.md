@@ -18,7 +18,7 @@ $ docker-compose -f ./docker-compose.yml up
 
 | Server | Endpoint |
 | --- | --- |
-| N8N | http://localhost:5678 | 
+| n8n | http://localhost:5678 | 
 | RMQ Management UI | http://localhost:15672/ | 
 | RMQ Server | amqp://localhost:5672/ |
 | MinIO Console | http://localhost:9001/ |
