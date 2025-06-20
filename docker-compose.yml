@@ -15,7 +15,8 @@ services:
       - "${NEO4J_PORT:-7474}:7474"
       - "7687:7687"
     restart: always
-
+    networks:
+      - servers
 
   postgres:
     image: ${POSTGRES_IMAGE:-docker.io/postgres:17-bullseye}
@@ -29,7 +30,8 @@ services:
     volumes:
       - ./dev-servers/postgres/data:/var/lib/postgresql/data
     restart: always
-
+    networks:
+      - servers
 
   pgvector:
     image: ${PGVECTOR_IMAGE:-docker.io/pgvector/pgvector:pg17}
@@ -43,7 +45,8 @@ services:
     volumes:
       - ./dev-servers/pgvector/data:/var/lib/postgresql/data
     restart: always
-
+    networks:
+      - servers
 
   redis:
     image: ${REDIS_IMAGE:-docker.io/redis:7.4-alpine}
@@ -53,7 +56,8 @@ services:
     volumes:
       - ./dev-servers/redis/data:/data
     restart: always
-
+    networks:
+      - servers
 
   rabbitmq:
     image: ${RABBITMQ_IMAGE:-docker.io/rabbitmq:4-management-alpine}
@@ -67,7 +71,8 @@ services:
     volumes:
       - ./dev-servers/rabbitmq/data:/var/lib/rabbitmq
     restart: always
-
+    networks:
+      - servers
 
   mongo:
     image: ${MONGO_IMAGE:-percona/percona-server-mongodb:latest}
@@ -80,7 +85,8 @@ services:
     volumes:
       - ./dev-servers/mongo/data:/data/db
     restart: always
-
+    networks:
+      - servers
 
   n8n:
     image: ${N8N_IMAGE:-n8nio/n8n:latest}
@@ -92,6 +98,8 @@ services:
       - ./dev-servers/n8n/data:/home/node/.n8n
     depends_on:
       - rabbitmq
+    networks:
+      - servers
 
 
   minio:
@@ -109,7 +117,8 @@ services:
       - MINIO_DEFAULT_BUCKET=${MINIO_BUCKET_NAME:-mys3bucket}
     command: server /data --console-address ":9001"
     restart: always
-
+    networks:
+      - servers
 
   ollama:
     image: ollama/ollama:latest
@@ -120,5 +129,9 @@ services:
     pull_policy: always
     tty: true
     restart: unless-stopped
+    networks:
+      - servers
 
-  
+networks:
+  servers:
+    driver: bridge
