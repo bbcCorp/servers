@@ -2,13 +2,14 @@
 Running servers locally using Docker containers
 
 ## Prerequisites
+- `Python 3`
 - `Docker` or `Podman` along with `docker compose` command
 
 
 ## Running local servers using Docker
 ```bash
 # Download the images
-$ sh fetch_images.sh
+$ python fetch_images.py
 
 # Bring up the servers
 $ docker-compose -f ./docker-compose.yml up 

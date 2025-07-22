@@ -48,13 +48,25 @@ services:
     networks:
       - servers
 
-  redis:
+  # redis:
+  #   image: ${REDIS_IMAGE:-docker.io/redis:7.4-alpine}
+  #   container_name: redis
+  #   ports:
+  #     - "${REDIS_PORT:-6379}:6379"
+  #   volumes:
+  #     - ./dev-servers/redis/data:/data
+  #   restart: always
+  #   networks:
+  #     - servers
+
+  redis-stack-server:
     image: ${REDIS_IMAGE:-docker.io/redis:7.4-alpine}
-    container_name: redis
+    container_name: redis-stack-server
     ports:
       - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_UI_PORT:-8001}:8001"
     volumes:
-      - ./dev-servers/redis/data:/data
+      - ./dev-servers/redis-stack-server/data:/data
     restart: always
     networks:
       - servers
