@@ -10,15 +10,15 @@ This repository provides a Docker-based local development environment for runnin
 
 ### Docker Compose Stack
 The repository uses a single `docker-compose.yml` file that orchestrates 9 services in a shared bridge network:
-- **Neo4j** (graph database) - ports 7474 (HTTP), 7687 (Bolt)
-- **Postgres** (relational database) - port 5432
-- **PgVector** (Postgres with vector extension) - port 5433
-- **Redis** (cache/key-value store) - port 6379
-- **RabbitMQ** (message broker) - ports 5672 (AMQP), 15672 (management UI)
-- **MongoDB** (document database via Percona) - port 27017
-- **n8n** (workflow automation) - port 5678
-- **MinIO** (S3-compatible object storage) - ports 9000 (API), 9001 (console)
-- **Ollama** (LLM runtime) - port 11435 (remapped from 11434)
+- **Neo4j** 2025.10 (graph database) - ports 7474 (HTTP), 7687 (Bolt)
+- **Postgres** 17-bullseye (relational database) - port 5432
+- **PgVector** pg17 (Postgres with vector extension) - port 5433
+- **Redis** 7.4-alpine (cache/key-value store) - port 6379
+- **RabbitMQ** 4-management-alpine (message broker) - ports 5672 (AMQP), 15672 (management UI)
+- **MongoDB** via Percona (document database) - port 27017
+- **n8n** latest (workflow automation) - port 5678
+- **MinIO** latest (S3-compatible object storage) - ports 9000 (API), 9001 (console)
+- **Ollama** latest (LLM runtime) - port 11435 (remapped from 11434)
 
 All services are configured with:
 - Persistent volumes mounted to `./dev-servers/<service>/data` (or `/config`, `/logs`, `/plugins` for Neo4j)

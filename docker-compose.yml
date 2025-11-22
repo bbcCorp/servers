@@ -2,7 +2,7 @@ services:
   
 
   neo4j:
-    image: ${NEO4J_IMAGE:-docker.io/neo4j:5.25-community}
+    image: ${NEO4J_IMAGE:-docker.io/neo4j:2025.10-community}
     container_name: neo4j
     volumes:
       - ./dev-servers/neo4j/logs:/logs
