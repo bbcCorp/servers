@@ -27,7 +27,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - ./dev-servers/postgres/data:/var/lib/postgresql/data
+      - ./dev-servers/postgres/data:/var/lib/postgresql/docker
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-postgres}"]
       interval: 10s
@@ -199,19 +199,19 @@ services:
   #   networks:
   #     - servers
 
-  # nginx:
-  #   image: ${NGINX_IMAGE:-nginx:stable-alpine}
-  #   container_name: nginx
-  #   ports:
-  #     - "${NGINX_HTTP_PORT:-80}:80"
-  #     - "${NGINX_HTTPS_PORT:-443}:443"
-  #   volumes:
-  #     - ./dev-servers/nginx/conf.d:/etc/nginx/conf.d
-  #     - ./dev-servers/nginx/html:/usr/share/nginx/html
-  #     - ./dev-servers/nginx/logs:/var/log/nginx
-  #   restart: always
-  #   networks:
-  #     - servers
+  nginx:
+    image: ${NGINX_IMAGE:-nginx:stable-alpine}
+    container_name: nginx
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./dev-servers/nginx/conf.d:/etc/nginx/conf.d
+      - ./dev-servers/nginx/html:/usr/share/nginx/html
+      - ./dev-servers/nginx/logs:/var/log/nginx
+    restart: always
+    networks:
+      - servers
 
   # grafana:
   #   image: ${GRAFANA_IMAGE:-grafana/grafana:latest}
