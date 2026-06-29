@@ -37,49 +37,49 @@ services:
     networks:
       - servers
 
-  pgvector:
-    image: ${PGVECTOR_DOCKER_IMAGE:-docker.io/pgvector/pgvector:pg18-trixie}
-    container_name: pgvector
-    environment:
-      - POSTGRES_USER=${PGVECTOR_USER:-postgres}
-      - POSTGRES_PASSWORD=${PGVECTOR_PASSWORD:-SuperSecurePassw0rd}
-      - POSTGRES_DB=${PGVECTOR_DB:-postgres}
-    ports:
-      - "${PGVECTOR_PORT:-5433}:5432"
-    volumes:
-      - ./dev-servers/pgvector/data:/var/lib/postgresql/data
-    restart: always
-    networks:
-      - servers
-
-  # redis:
-  #   image: ${REDIS_IMAGE:-docker.io/redis:8.8.0-alpine}
-  #   container_name: redis
+  # pgvector:
+  #   image: ${PGVECTOR_DOCKER_IMAGE:-docker.io/pgvector/pgvector:pg18-trixie}
+  #   container_name: pgvector
+  #   environment:
+  #     - POSTGRES_USER=${PGVECTOR_USER:-postgres}
+  #     - POSTGRES_PASSWORD=${PGVECTOR_PASSWORD:-SuperSecurePassw0rd}
+  #     - POSTGRES_DB=${PGVECTOR_DB:-postgres}
   #   ports:
-  #     - "${REDIS_PORT:-6379}:6379"
+  #     - "${PGVECTOR_PORT:-5433}:5432"
   #   volumes:
-  #     - ./dev-servers/redis/data:/data
+  #     - ./dev-servers/pgvector/data:/var/lib/postgresql/data
   #   restart: always
   #   networks:
   #     - servers
 
-  redis-stack-server:
-    image: ${REDIS_SERVER_STACK_DOCKER_IMAGE:-docker.io/redis/redis-stack-server:latest}
-    container_name: redis-stack-server
+  redis:
+    image: ${REDIS_IMAGE:-docker.io/redis:8-alpine}
+    container_name: redis
     ports:
       - "${REDIS_PORT:-6379}:6379"
-      - "${REDIS_UI_PORT:-8001}:8001"
     volumes:
-      - ./dev-servers/redis-stack-server/data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 30s
-      retries: 50
-      start_period: 30s
+      - ./dev-servers/redis/data:/data
     restart: always
     networks:
       - servers
+
+  # redis-stack-server:
+  #   image: ${REDIS_SERVER_STACK_DOCKER_IMAGE:-docker.io/redis/redis-stack-server:latest}
+  #   container_name: redis-stack-server
+  #   ports:
+  #     - "${REDIS_PORT:-6379}:6379"
+  #     - "${REDIS_UI_PORT:-8001}:8001"
+  #   volumes:
+  #     - ./dev-servers/redis-stack-server/data:/data
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 30s
+  #     retries: 50
+  #     start_period: 30s
+  #   restart: always
+  #   networks:
+  #     - servers
 
   rabbitmq:
     image: ${RABBITMQ_DOCKER_IMAGE:-docker.io/rabbitmq:4.3.2-management-alpine}
@@ -96,30 +96,43 @@ services:
     networks:
       - servers
 
-  mongo:
-    image: ${MONGO_DOCKER_IMAGE:-percona/percona-server-mongodb:latest}
-    container_name: mongo
-    ports:
-      - "${MONGO_PORT:-27017}:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME:-mongoadmin}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-SuperSecurePassw0rd}
-    volumes:
-      - ./dev-servers/mongo/data:/data/db
-    restart: always
-    networks:
-      - servers
+  # mongo:
+  #   image: ${MONGO_DOCKER_IMAGE:-percona/percona-server-mongodb:latest}
+  #   container_name: mongo
+  #   ports:
+  #     - "${MONGO_PORT:-27017}:27017"
+  #   environment:
+  #     - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME:-mongoadmin}
+  #     - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-SuperSecurePassw0rd}
+  #   volumes:
+  #     - ./dev-servers/mongo/data:/data/db
+  #   restart: always
+  #   networks:
+  #     - servers
 
   n8n:
-    image: ${N8N_DOCKER_IMAGE:-n8nio/n8n:latest}
+    image: ${N8N_DOCKER_IMAGE:-n8nio/n8n:stable}
     container_name: n8n
     ports:
       - "${N8N_PORT:-5678}:5678"
+    environment:
+      - GENERIC_TIMEZONE=${TIMEZONE:-UTC+05:30}
+      - TZ="${TIMEZONE:-UTC+05:30}"
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_RUNNERS_ENABLED=true
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB:-postgres}
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=${POSTGRES_PORT:-5432}
+      - DB_POSTGRESDB_USER=${POSTGRES_USER:-postgres}
+      - DB_POSTGRESDB_SCHEMA=${POSTGRES_N8N_SCHEMA:-n8n}
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD:-SuperSecurePassw0rd}
     restart: always
     volumes:
       - ./dev-servers/n8n/data:/home/node/.n8n
     depends_on:
       - rabbitmq
+      - postgres
     networks:
       - servers
 
@@ -153,68 +166,68 @@ services:
 #    networks:
 #      - servers
 
-  elasticsearch:
-    image: ${ELASTICSEARCH_IMAGE:-elasticsearch:9.4.2}
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - xpack.security.enrollment.enabled=false
-    ports:
-      - "${ELASTICSEARCH_PORT:-9200}:9200"
-      - "9300:9300"
-    volumes:
-      - ./dev-servers/elasticsearch/data:/usr/share/elasticsearch/data
-      - ./dev-servers/elasticsearch/config:/usr/share/elasticsearch/config
-    restart: always
-    networks:
-      - servers
+  # elasticsearch:
+  #   image: ${ELASTICSEARCH_IMAGE:-elasticsearch:9.4.2}
+  #   container_name: elasticsearch
+  #   environment:
+  #     - discovery.type=single-node
+  #     - xpack.security.enabled=false
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #     - xpack.security.enrollment.enabled=false
+  #   ports:
+  #     - "${ELASTICSEARCH_PORT:-9200}:9200"
+  #     - "9300:9300"
+  #   volumes:
+  #     - ./dev-servers/elasticsearch/data:/usr/share/elasticsearch/data
+  #     - ./dev-servers/elasticsearch/config:/usr/share/elasticsearch/config
+  #   restart: always
+  #   networks:
+  #     - servers
 
-  kibana:
-    image: ${KIBANA_IMAGE:-kibana:9.4.2}
-    container_name: kibana
-    ports:
-      - "${KIBANA_PORT:-5601}:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    depends_on:
-      - elasticsearch
-    volumes:
-      - ./dev-servers/kibana/data:/usr/share/kibana/data
-    restart: always
-    networks:
-      - servers
+  # kibana:
+  #   image: ${KIBANA_IMAGE:-kibana:9.4.2}
+  #   container_name: kibana
+  #   ports:
+  #     - "${KIBANA_PORT:-5601}:5601"
+  #   environment:
+  #     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+  #   depends_on:
+  #     - elasticsearch
+  #   volumes:
+  #     - ./dev-servers/kibana/data:/usr/share/kibana/data
+  #   restart: always
+  #   networks:
+  #     - servers
 
-  nginx:
-    image: ${NGINX_IMAGE:-nginx:stable-alpine}
-    container_name: nginx
-    ports:
-      - "${NGINX_HTTP_PORT:-80}:80"
-      - "${NGINX_HTTPS_PORT:-443}:443"
-    volumes:
-      - ./dev-servers/nginx/conf.d:/etc/nginx/conf.d
-      - ./dev-servers/nginx/html:/usr/share/nginx/html
-      - ./dev-servers/nginx/logs:/var/log/nginx
-    restart: always
-    networks:
-      - servers
+  # nginx:
+  #   image: ${NGINX_IMAGE:-nginx:stable-alpine}
+  #   container_name: nginx
+  #   ports:
+  #     - "${NGINX_HTTP_PORT:-80}:80"
+  #     - "${NGINX_HTTPS_PORT:-443}:443"
+  #   volumes:
+  #     - ./dev-servers/nginx/conf.d:/etc/nginx/conf.d
+  #     - ./dev-servers/nginx/html:/usr/share/nginx/html
+  #     - ./dev-servers/nginx/logs:/var/log/nginx
+  #   restart: always
+  #   networks:
+  #     - servers
 
-  grafana:
-    image: ${GRAFANA_IMAGE:-grafana/grafana:latest}
-    container_name: grafana
-    ports:
-      - "${GRAFANA_PORT:-3000}:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-    volumes:
-      - ./dev-servers/grafana/data:/var/lib/grafana
-      - ./dev-servers/grafana/provisioning:/etc/grafana/provisioning
-    restart: always
-    networks:
-      - servers
+  # grafana:
+  #   image: ${GRAFANA_IMAGE:-grafana/grafana:latest}
+  #   container_name: grafana
+  #   ports:
+  #     - "${GRAFANA_PORT:-3000}:3000"
+  #   environment:
+  #     - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+  #     - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+  #     - GF_USERS_ALLOW_SIGN_UP=false
+  #   volumes:
+  #     - ./dev-servers/grafana/data:/var/lib/grafana
+  #     - ./dev-servers/grafana/provisioning:/etc/grafana/provisioning
+  #   restart: always
+  #   networks:
+  #     - servers
 
 networks:
   servers:
