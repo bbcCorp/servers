@@ -32,6 +32,7 @@ All services run on a custom bridge network called `servers` for secure inter-se
 
 | Service | Port(s) | Description | Web UI |
 |---------|---------|-------------|--------|
+| **Dozzle** | 8888 | Local Container log viewer | [http://localhost:8888/](http://localhost:8888/) | 
 | **Elasticsearch** | 9200, 9300 | Search and Analytics Engine | - |
 | **Kibana** | 5601 | Visualization Tool for Elasticsearch | [http://localhost:5601](http://localhost:5601) |
 | **Nginx** | 80, 443 | Reverse Proxy and Load Balancer | [http://localhost](http://localhost) |
