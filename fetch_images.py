@@ -19,9 +19,11 @@ def main():
     # Get all environment variables
     env_vars = os.environ
     
-    # Filter and pull Docker images
+    # Filter and pull Docker images. Match any *_IMAGE or *_DOCKER_IMAGE
+    # env var so services using either naming convention are covered
+    # (e.g. NEO4J_IMAGE, NGINX_IMAGE alongside POSTGRES_DOCKER_IMAGE).
     for key, value in env_vars.items():
-        if key.endswith('_DOCKER_IMAGE'):
+        if key.endswith('_IMAGE') or key.endswith('_DOCKER_IMAGE'):
             pull_docker_image(value)
 
 if __name__ == "__main__":

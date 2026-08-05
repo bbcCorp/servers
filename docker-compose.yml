@@ -35,7 +35,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - ./dev-servers/postgres/data:/var/lib/postgresql/docker
+      - ./dev-servers/postgres/data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-postgres}"]
       interval: 10s
@@ -130,14 +130,14 @@ services:
       - "${N8N_PORT:-5678}:5678"
     environment:
       - GENERIC_TIMEZONE=${TIMEZONE:-UTC+05:30}
-      - TZ="${TIMEZONE:-UTC+05:30}"
+      - TZ=${TIMEZONE:-UTC+05:30}
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
       - N8N_RUNNERS_ENABLED=true
       - N8N_SECURE_COOKIE=false
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_DATABASE=${POSTGRES_DB:-postgres}
       - DB_POSTGRESDB_HOST=postgres
-      - DB_POSTGRESDB_PORT=${POSTGRES_PORT:-5432}
+      - DB_POSTGRESDB_PORT=5432
       - DB_POSTGRESDB_USER=${POSTGRES_USER:-postgres}
       - DB_POSTGRESDB_SCHEMA=${POSTGRES_N8N_SCHEMA:-n8n}
       - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD:-SuperSecurePassw0rd}
@@ -145,8 +145,10 @@ services:
     volumes:
       - ./dev-servers/n8n/data:/home/node/.n8n
     depends_on:
-      - rabbitmq
-      - postgres
+      rabbitmq:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     networks:
       - servers
 
@@ -242,6 +244,24 @@ services:
   #   restart: always
   #   networks:
   #     - servers
+
+  graphdb:
+    image: ${GRAPHDB_IMAGE:-docker.io/ontotext/graphdb:11.4.2}
+    container_name: graphdb
+    ports:
+      - "${GRAPHDB_PORT:-7200}:7200"
+    volumes:
+      - graphdb-data:/opt/graphdb/home
+    environment:
+      - GRAPHDB_HOME=/opt/graphdb/home
+      - GRAPHDB_HEAP_SIZE=2G
+    restart: always
+    networks:
+      - servers
+
+volumes:
+  graphdb-data:
+
 
 networks:
   servers:
