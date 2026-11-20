@@ -2,3 +2,19 @@ tmp/
 data/
 logs/
 client-test/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+
+# Development server data
+dev-servers/*/data/
+
+# IDE and OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store

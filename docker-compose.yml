@@ -2,7 +2,7 @@ services:
 
   dozzle:
     container_name: dozzle
-    image: amir20/dozzle:latest
+    image: ${DOZZLE_IMAGE:-amir20/dozzle:latest}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
@@ -26,16 +26,18 @@ services:
       - servers
 
   postgres:
-    image: ${POSTGRES_DOCKER_IMAGE:-docker.io/postgres:18-alpine}
+    image: ${POSTGRES_DOCKER_IMAGE:-docker.io/postgres:17-alpine}
     container_name: postgres
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-SuperSecurePassw0rd}
       - POSTGRES_DB=${POSTGRES_DB:-postgres}
+      - POSTGRES_INITDB_ARGS=${POSTGRES_INITDB_ARGS}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - ./dev-servers/postgres/data:/var/lib/postgresql/data
+      - ./dev-servers/postgres/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-postgres}"]
       interval: 10s
@@ -119,6 +121,31 @@ services:
   #     - servers
 
 
+  hindsight:
+    image: ${HINDSIGHT_DOCKER_IMAGE:-ghcr.io/vectorize-io/hindsight:latest}
+    container_name: hindsight
+    ports:
+      - "${HINDSIGHT_PORT:-8080}:8080"
+    environment:
+      DATABASE_URL: "postgresql://hindsight_user:hindsight@1@postgres:5432/postgres?application_name=hindsight"
+      HINDSIGHT_API_LLM_PROVIDER: "ollama"
+      HINDSIGHT_API_LLM_API_KEY: "${LLM_API_KEY}"
+      HINDSIGHT_API_LLM_BASE_URL: "${LLM_API}"
+      HINDSIGHT_API_LLM_MODEL: "${LLM_DEFAULT_MODEL}"
+      HINDSIGHT_API_EMBEDDINGS_PROVIDER: "ollama"
+      HINDSIGHT_API_EMBEDDINGS_BASE_URL: "${LLM_API}"
+      HINDSIGHT_API_EMBEDDINGS_MODEL: "${LLM_EMBEDDING_MODEL}"
+      HINDSIGHT_API_RERANKER_PROVIDER: "none"
+      LOG_LEVEL: "info"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./dev-servers/hindsight/data:/app/data
+    restart: always
+    networks:
+      - servers
+
   # n8n Agent Workflow server
   # Remeber to set the permission to the folder
   # sudo chown -R 1000:1000 ./dev-servers/n8n
@@ -152,35 +179,29 @@ services:
     networks:
       - servers
 
-  minio:
-    image: ${MINIO_DOCKER_IMAGE:-minio/minio:latest}
-    container_name: minio
+  rustfs:
+    image: ${RUSTFS_DOCKER_IMAGE:-rustfs/rustfs:latest}
+    container_name: rustfs
     ports:
-      - "${MINIO_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+      - "${RUSTFS_PORT:-9000}:9000"
     volumes:
-      - ./dev-servers/minio/data:/data
-    environment:
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-      - MINIO_DATA_DIR=/data
-      - MINIO_DEFAULT_BUCKET=${MINIO_BUCKET_NAME:-mys3bucket}
-    command: server /data --console-address ":9001"
+      - ./dev-servers/rustfs/data:/data
     restart: always
     networks:
       - servers
 
-#  ollama:
-#    image: ${OLLAMA_DOCKER_IMAGE:-ollama/ollama:latest}
-#    container_name: ollama
-#    ports: ["${OLLAMA_PORT:-11434}:11434"]
-#    volumes:
-#      - ./dev-servers/ollama:/root/.ollama
-#    pull_policy: always
-#    tty: true
-#    restart: unless-stopped
-#    networks:
-#      - servers
+  # ollama: (Using Ollama Cloud - remote instance)
+  #   image: ${OLLAMA_DOCKER_IMAGE:-ollama/ollama:latest}
+  #   container_name: ollama
+  #   ports:
+  #     - "${OLLAMA_PORT:-11434}:11434"
+  #   volumes:
+  #     - ./dev-servers/ollama:/root/.ollama
+  #   pull_policy: always
+  #   tty: true
+  #   restart: unless-stopped
+  #   networks:
+  #     - servers
 
   # elasticsearch:
   #   image: ${ELASTICSEARCH_IMAGE:-elasticsearch:9.4.2}
@@ -246,7 +267,7 @@ services:
   #     - servers
 
   graphdb:
-    image: ${GRAPHDB_IMAGE:-docker.io/ontotext/graphdb:11.4.2}
+    image: ${GRAPHDB_IMAGE:-docker.io/ontotext/graphdb:11.5.1}
     container_name: graphdb
     ports:
       - "${GRAPHDB_PORT:-7200}:7200"
